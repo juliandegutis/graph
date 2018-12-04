@@ -3,27 +3,50 @@
 
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
 
+/*
+ A graph structure compose by
+ int nVertices - A number of vertices
+ int edges - A number of edges
+ Vertice* vertice - A linked list that references all the vertices
+*/
 struct Graph {
 	int nVertices;
 	int edges;
 	struct Vertice *vertice; 
 };
 
+/*
+	A linked list structure that references all vertices from a Graph g
+	number - Unique identifier of a vertice in a Graph
+	Vertice* prox - References another Vertice to compose a Graph
+	AdjList* adjList - Adjascent List structure from a Vertice 
+*/
 struct Vertice {
 	int number;
 	struct Vertice *prox;
 	struct AdjList *adjList;
 }; 
 
+/*
+	Adjascent linked list structure with a list of nodes adjascents from a Vertice
+	AdjNode* node - Node referencing an vertice of Graph
+*/
 struct AdjList {
 	struct AdjNode *node;
 }; 
 
+/*
+	Adjascent vertice structure, linked list of all adjascent nodes from a Vertice v
+	int number - Unique identifier of a vertice
+*/
 struct AdjNode {
 	int number;
 	struct AdjNode *prox;
 };
 
+/*
+	Instance method to create an empty Graph with only one vertice and no edges.
+*/
 struct Graph* createEmpty() {
 	
 	struct Vertice* createVertice();
@@ -40,6 +63,10 @@ struct Graph* createEmpty() {
 	
 }
 
+/*
+	Instance method that creates an individual Vertice with the respective adjascent linked list of the Vertice v
+	Param: int value - Unique identifier of the Vertice on a Graph
+*/
 struct Vertice* createVertice( int value ) {
 	struct Vertice* v;
 	v = (struct Vertice*) malloc( sizeof( struct Vertice ) );
@@ -55,6 +82,21 @@ struct Vertice* createVertice( int value ) {
 
 }
 
+/*
+	Add a relationship between two vertices from a Graph
+	Params: struct Graph* g - Reference to a graph that will be modified
+			int v1 - Unique identifier of one Vertice
+			int v2 - Unique identifier of one Vertice
+*/
+void addEdge( struct Graph* g, int v1, int v2 ) {
+	
+}
+
+/*
+	Add a vertice in a Graph
+	Params: int value - Unique identifier of the Vertice
+			struct Graph* g - Reference to a graph that will be modified
+*/
 void addVertice( struct Graph* g, int value ) {
 	
 	struct Vertice* createVertice();
