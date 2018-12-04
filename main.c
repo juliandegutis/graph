@@ -77,6 +77,7 @@ struct Vertice* createVertice( int value ) {
 	adjList = (struct AdjList *) malloc( sizeof( struct AdjList ) );
 	
 	v->adjList = adjList;
+	v->adjList->node = NULL;
 	
 	return v;
 
@@ -89,6 +90,36 @@ struct Vertice* createVertice( int value ) {
 			int v2 - Unique identifier of one Vertice
 */
 void addEdge( struct Graph* g, int v1, int v2 ) {
+	
+	struct Vertice* vAux;
+	
+	vAux = g->vertice;
+	
+	while( vAux != NULL ) {
+		
+		if( vAux->number == v1 ) {
+					
+			struct AdjList* adjList = vAux->adjList;
+			
+			struct AdjNode* adjNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
+			adjNode->number = v2;
+			adjNode->prox = vAux->adjList->node;
+			vAux->adjList->node = adjNode;
+			adjList = NULL;
+			
+		} else if( vAux->number == v2 ) {
+			struct AdjList* adjList = vAux->adjList;
+			
+			struct AdjNode* adjNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
+			adjNode->number = v1;
+			adjNode->prox = vAux->adjList->node;
+			vAux->adjList->node = adjNode;
+			adjList = NULL;
+		}
+		
+		vAux = vAux->prox;
+	}
+	
 	
 }
 
@@ -115,17 +146,32 @@ void print( struct Graph* g ) {
 	struct Vertice* aux;
 	aux = g->vertice;
 	while( aux != NULL ) {
-		printf( "%d\n", aux->number );
+		printf( "\nVertice %d   ", aux->number );
+		struct AdjList* adjList = aux->adjList;
+		
+		struct AdjNode* node = adjList->node;
+		printf( "Lista Adj -> ");
+		while( node != NULL ) {
+			printf( "%d -> ", node->number );
+			node = node->prox;
+		}
+		
 		aux = aux->prox;
 	}
 }
 
 int main() {
 	
-	struct Graph* g = createEmpty();
+	void addEdge( struct Graph* g, int v1, int v2 );
 	void addVertice( struct Graph* g, int value );
 	
+	struct Graph* g = createEmpty();
+	
 	addVertice( g, 2 );
+	addVertice( g, 3 );
+	addVertice( g, 4 );
+	addEdge( g, 1, 2 );
+	addEdge( g, 1, 3 );
 	
 	print( g );
 	
