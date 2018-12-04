@@ -142,30 +142,57 @@ void addVertice( struct Graph* g, int value ) {
 	
 }
 
+/*
+	Recursevly check if a Graph is bipartite, based on current vertice
+*/
 int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor ) {
 	
 	struct Vertice* aux = g->vertice;	
 	printf( "\nStarting vertice: %d", v );
-	
 
+	/*
+		Iterates the Graph checking if the current Vertice is equal to an vertice
+	*/
 	while( aux != NULL ) {
-	
+		
+		/*
+			Finds the needed Vertice
+		*/
 		if( aux->number == v) {
+			
+			/*
+				Change the color of bipartite validation algorithm
+			*/
 			if( currentColor == 0 ) {
 				currentColor++;
 			} else {
 				currentColor--;
 			}
 			
+			/*
+				Marks the current vertice as done
+			*/
 			done[v] = 1;
+			
 			struct AdjList* adjListAux = aux->adjList;
 			struct AdjNode* node = adjListAux->node;
 			while( node != NULL ) {
+				/*
+					Checks if any adjascente node/vertice from the iterate vertice, have the same color than it
+					Rule: Return -1 if both vertices shares the same color.
+				*/
 				if( color[node->number] == color[v]) {
 					return -1;
-				}				
+				}		
+				
+				/*
+					Fill the current node/vertice with the current color from iteration
+				*/		
 				color[node->number] = currentColor;
 				
+				/*
+					If the node value is not on done list, do isBipartite to a node/vertice identifier recursevly
+				*/
 				if( done[node->number] == -1 ) {
 					return isBipartite( g, node->number, color, done, currentColor );
 				}
@@ -224,10 +251,17 @@ int main() {
 	addEdge( g, 0, 3 );
 	
 	//print( g );
+	
+	/*
+		Bipartite validation start block 
+	*/
 	int color[g->nVertices];
 	int done[g->nVertices];
 	int i = 0;
 	
+	/*
+		Start both color and done array with -1 
+	*/
 	for( i = 0 ; i < g->nVertices ; i++ ) {
 		color[i] = -1;
 	}
@@ -235,12 +269,18 @@ int main() {
 	for( i = 0 ; i < g->nVertices ; i++ ) {
 		done[i] = -1;
 	}
+	/*
+		Fill the color of the first vertice in our Graph representation with 0, then check if it is not a graph with only one vertice.
+	*/
 	int currentColor = 0;
 	color[g->vertice->number] = currentColor;
 	if( g->vertice->prox != NULL ) {
 		int result = isBipartite( g, g->vertice->number, color, done, currentColor );
 		printf( "\n\nResultado: %d", result);
 	}
+	/*
+		Bipartite validation end block
+	*/
 	
 	printf( "\n\n\n\nOk" );
 	getch();
