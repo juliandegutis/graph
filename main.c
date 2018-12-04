@@ -23,6 +23,7 @@ struct Graph {
 */
 struct Vertice {
 	int number;
+	int color;
 	struct Vertice *prox;
 	struct AdjList *adjList;
 }; 
@@ -56,7 +57,7 @@ struct Graph* createEmpty() {
 	graph = (struct Graph*) malloc( sizeof( struct Graph ) );
 	graph->nVertices = 1;
 	graph->edges = 0;	
-	struct Vertice* v = createVertice(1);
+	struct Vertice* v = createVertice(0);
 	graph->vertice = v;
 	
 	return graph;
@@ -133,6 +134,7 @@ void addVertice( struct Graph* g, int value ) {
 	struct Vertice* createVertice();
 	struct Vertice* v = createVertice( value );
 	
+	v->color = -1;
 	v->prox = g->vertice;
 	g->vertice = v;
 	
@@ -140,13 +142,57 @@ void addVertice( struct Graph* g, int value ) {
 	
 }
 
+int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor ) {
+	
+	struct Vertice* aux = g->vertice;	
+	printf( "\nStarting vertice: %d", v );
+	
+
+	while( aux != NULL ) {
+	
+		if( aux->number == v) {
+			if( currentColor == 0 ) {
+				currentColor++;
+			} else {
+				currentColor--;
+			}
+			
+			done[v] = 1;
+			struct AdjList* adjListAux = aux->adjList;
+			struct AdjNode* node = adjListAux->node;
+			while( node != NULL ) {
+				if( color[node->number] == color[v]) {
+					return -1;
+				}				
+				color[node->number] = currentColor;
+				
+				if( done[node->number] == -1 ) {
+					return isBipartite( g, node->number, color, done, currentColor );
+				}
+				
+				node = node->prox;
+			}
+		}
+		
+		aux = aux->prox;
+		
+	}
+	
+	return 1;
+	
+}
+
+/*
+	Print the full graph representation
+*/
 void print( struct Graph* g ) {
-	printf( "%d\n", g->nVertices);
+
+	printf( "\n\n");
 	
 	struct Vertice* aux;
 	aux = g->vertice;
 	while( aux != NULL ) {
-		printf( "\nVertice %d   ", aux->number );
+		printf( "\nVertice %d  - Color %d  ", aux->number, aux->color );
 		struct AdjList* adjList = aux->adjList;
 		
 		struct AdjNode* node = adjList->node;
@@ -164,18 +210,37 @@ int main() {
 	
 	void addEdge( struct Graph* g, int v1, int v2 );
 	void addVertice( struct Graph* g, int value );
+	int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor );
 	
 	struct Graph* g = createEmpty();
 	
+	addVertice( g, 1 );
 	addVertice( g, 2 );
 	addVertice( g, 3 );
-	addVertice( g, 4 );
-	addEdge( g, 1, 2 );
-	addEdge( g, 1, 3 );
+	addEdge( g, 0, 1 );
+	addEdge( g, 0, 2 );
+	addEdge( g, 2, 3 );
+	addEdge( g, 3, 1 );
+	addEdge( g, 0, 3 );
 	
-	print( g );
+	//print( g );
+	int color[g->nVertices];
+	int done[g->nVertices];
+	int i = 0;
 	
+	for( i = 0 ; i < g->nVertices ; i++ ) {
+		color[i] = -1;
+	}
 	
+	for( i = 0 ; i < g->nVertices ; i++ ) {
+		done[i] = -1;
+	}
+	int currentColor = 0;
+	color[g->vertice->number] = currentColor;
+	if( g->vertice->prox != NULL ) {
+		int result = isBipartite( g, g->vertice->number, color, done, currentColor );
+		printf( "\n\nResultado: %d", result);
+	}
 	
 	printf( "\n\n\n\nOk" );
 	getch();
