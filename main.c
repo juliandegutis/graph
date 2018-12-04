@@ -45,13 +45,16 @@ struct AdjNode {
 	struct AdjNode *prox;
 };
 
+void addEdge( struct Graph* g, int v1, int v2 );
+void addVertice( struct Graph* g, int value );
+int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor );
+struct Vertice* createVertice();
+
 /*
 	Instance method to create an empty Graph with only one vertice and no edges.
 */
 struct Graph* createEmpty() {
-	
-	struct Vertice* createVertice();
-	
+		
 	struct Graph *graph;
 	
 	graph = (struct Graph*) malloc( sizeof( struct Graph ) );
@@ -131,7 +134,6 @@ void addEdge( struct Graph* g, int v1, int v2 ) {
 */
 void addVertice( struct Graph* g, int value ) {
 	
-	struct Vertice* createVertice();
 	struct Vertice* v = createVertice( value );
 	
 	v->color = -1;
@@ -235,9 +237,28 @@ void print( struct Graph* g ) {
 
 int main() {
 	
-	void addEdge( struct Graph* g, int v1, int v2 );
-	void addVertice( struct Graph* g, int value );
-	int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor );
+	int ctrl = 1;
+	int op;
+	
+	do {
+		
+		printf( "**********************************************\n");
+		printf( "*****************   GRAFOS  ******************\n");
+		printf( "**********************************************\n");
+		printf("\n\n");
+		printf("Menu: \n");
+		printf("1 - Verificar Grafo\n");
+		printf("2 - Adicionar Funcionário\n" );
+		printf("3 - Adicionar Tarefa\n" );
+		printf("4 - Imprimir Grafo\n");
+		printf("5 - Sair\n");
+		
+		scanf( "Opcao %d", &ctrl);
+		
+		printf("%d", ctrl);
+		
+		ctrl = 2;
+	} while( ctrl == 1 );
 	
 	struct Graph* g = createEmpty();
 	
