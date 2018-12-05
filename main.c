@@ -3,6 +3,7 @@
 #include <string.h>
 
 struct Graph* graph;
+struct Graph* company;
 
 /*
  A graph structure compose by
@@ -21,10 +22,12 @@ struct Graph {
 	number - Unique identifier of a vertice in a Graph
 	Vertice* prox - References another Vertice to compose a Graph
 	AdjList* adjList - Adjascent List structure from a Vertice 
+	int type - Type of the Vertice in a context: 1 - Employee / 2 - Task
 */
 struct Vertice {
 	int number;
 	int color;
+	int type;
 	struct Vertice *prox;
 	struct AdjList *adjList;
 }; 
@@ -47,10 +50,14 @@ struct AdjNode {
 };
 
 void addEdge( struct Graph* g, int v1, int v2 );
-void addVertice( struct Graph* g, int value );
+void addVertice( struct Graph* g, int value, int type );
+int validate( int identifier, int type );
 int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor );
-struct Vertice* createVertice();
+struct Vertice* createVertice( int value, int type );
 void verifyGraph();
+void addRelationship( struct Graph* g, int v1, int t1, int v2, int t2 );
+int bipartiteRestriction( int employeeId, int taskId );
+void checkAttributions();
 
 /*
 	Instance method to create an empty Graph with only one vertice and no edges.
@@ -62,7 +69,7 @@ struct Graph* createEmpty() {
 	graph = (struct Graph*) malloc( sizeof( struct Graph ) );
 	graph->nVertices = 1;
 	graph->edges = 0;	
-	struct Vertice* v = createVertice(0);
+	struct Vertice* v = createVertice(0, 1);
 	graph->vertice = v;
 	
 	return graph;
@@ -73,11 +80,12 @@ struct Graph* createEmpty() {
 	Instance method that creates an individual Vertice with the respective adjascent linked list of the Vertice v
 	Param: int value - Unique identifier of the Vertice on a Graph
 */
-struct Vertice* createVertice( int value ) {
+struct Vertice* createVertice( int value, int type ) {
 	struct Vertice* v;
 	v = (struct Vertice*) malloc( sizeof( struct Vertice ) );
 	v->number = value;
 	v->prox = NULL;
+	v->type = type;
 	
 	struct AdjList *adjList;
 	adjList = (struct AdjList *) malloc( sizeof( struct AdjList ) );
@@ -129,15 +137,49 @@ void addEdge( struct Graph* g, int v1, int v2 ) {
 	
 }
 
+void addRelationship( struct Graph* g, int v1, int t1, int v2, int t2 ) {
+	
+	struct Vertice* vAux;
+	
+	vAux = g->vertice;
+	
+	while( vAux != NULL ) {
+		
+		if( vAux->number == v1 && vAux->type == t1 ) {
+					
+			struct AdjList* adjList = vAux->adjList;
+			
+			struct AdjNode* adjNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
+			adjNode->number = v2;
+			adjNode->prox = vAux->adjList->node;
+			vAux->adjList->node = adjNode;
+			adjList = NULL;
+			
+		} else if( vAux->number == v2 && vAux->type == t2 ) {
+			struct AdjList* adjList = vAux->adjList;
+			
+			struct AdjNode* adjNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
+			adjNode->number = v1;
+			adjNode->prox = vAux->adjList->node;
+			vAux->adjList->node = adjNode;
+			adjList = NULL;
+		}
+		
+		vAux = vAux->prox;
+	}
+	
+	
+}
+
 /*
 	Add a vertice in a Graph
 	Params: int value - Unique identifier of the Vertice
 			struct Graph* g - Reference to a graph that will be modified
 */
-void addVertice( struct Graph* g, int value ) {
+void addVertice( struct Graph* g, int value, int type ) {
 	
 	printf( "Adding %d\n", value);
-	struct Vertice* v = createVertice( value );	
+	struct Vertice* v = createVertice( value, type );	
 	v->color = -1;
 	v->prox = g->vertice;
 	g->vertice = v;
@@ -222,7 +264,7 @@ void print( struct Graph* g ) {
 	struct Vertice* aux;
 	aux = g->vertice;
 	while( aux != NULL ) {
-		printf( "\nVertice %d ", aux->number );
+		printf( "\nVertice %d | type %d ", aux->number, aux->type );
 		struct AdjList* adjList = aux->adjList;
 		
 		struct AdjNode* node = adjList->node;
@@ -260,7 +302,7 @@ void verifyGraph() {
 	int i = 0;
 	while (pt != NULL) {
     	int a = atoi(pt);
-    	addVertice( graph, a );
+    	addVertice( graph, a, 1 );
     	pt = strtok(NULL, ",");
 	}
 
@@ -303,19 +345,181 @@ void verifyGraph() {
 	if( graph->vertice->prox != NULL ) {
 		int result = isBipartite( graph, graph->vertice->number, color, done, currentColor );
 		if( result == -1 ) {
-			printf( "\n\nResultado: O grafico nao e bipartido", result);
+			printf( "\n\nResultado: O grafico nao e bipartido");
 		} else {
-			printf( "\n\nResultado: O grafico e bipartido", result);
+			printf( "\n\nResultado: O grafico e bipartido");
 		}
 	
 	}
   	
 }
 
+/**
+	Validate the unique identifier compose by number plus type from all Vertices of a Graph
+*/
+int validate( int identifier, int type ) {
+	
+	if( identifier == 0 ) {
+		return -1;
+	}
+	
+	struct Vertice* v = company->vertice;
+	while( v != NULL ) {
+		if( v->number == identifier && v->type == type ) {
+			return -1;
+		}
+		v = v->prox;
+	}
+	
+	return 1;
+	
+}
+
+int isPresent( int identifier, int type ) {
+	if( identifier == 0 ) {
+		return 1;
+	}
+	
+	struct Vertice* v = company->vertice;
+	while( v != NULL ) {
+		if( v->number == identifier && v->type == type ) {
+			return 1;
+		}
+		v = v->prox;
+	}
+	
+	return -1;
+}
+
+void addEmployee() {
+	
+	int employeeId;
+	
+	system("cls");
+	printf(" \n\n");
+	printf( "**********************************************\n");
+	printf( "*********** ADICIONAR FUNCIONARIO  ***********\n");
+	printf( "**********************************************\n");
+	printf("\n\n");
+	printf( "Digite o identificador do usuario\n");
+	scanf( "%i", &employeeId );
+	
+	int valid = validate( employeeId, 1 );
+	if( valid == 1 ) {
+		addVertice( company, employeeId, 1 );
+	} else {
+		printf("\n\nNao foi possivel inserir o funcionario, o funcionario ja esta cadastrado na empresa" );
+	}
+	
+}
+
+void addTask() {
+	
+	int taskId;
+	
+	system("cls");
+	printf(" \n\n");
+	printf( "**********************************************\n");
+	printf( "************* ADICIONAR TAREFA  **************\n");
+	printf( "**********************************************\n");
+	printf("\n\n");
+	printf( "Digite o identificador da tarefa\n");
+	scanf( "%i", &taskId);
+	
+	int valid = validate( taskId, 2 );
+	if( valid == 1 ) {
+		addVertice( company, taskId, 2 );
+	} else {
+		printf( "\n\nNao foi possivel inserir a tarefa, a tarefa ja esta cadastrada na empresa" );
+	}
+	
+}
+
+int bipartiteRestriction( int employeeId, int taskId ) {
+	
+	int typeEmployee;
+	int typeTask;
+	
+	struct Vertice* v = company->vertice;
+	while( v != NULL ) {
+		if( v->number == employeeId && v->type == 1 ) {
+			typeEmployee = v->type;
+		}
+		if( v->number == taskId && v->type == 2 ) {
+			typeTask = v->type;
+		}
+		v = v->prox;
+	}
+	
+	if( typeEmployee == typeTask ) {
+		return -1;
+	} else {
+		return 1;
+	}
+}
+
+void checkAttributions() {
+	
+	struct Vertice* v = company->vertice;
+	
+	while( v != NULL ){
+		if( v->type == 1 ) {
+			struct AdjNode* node = v->adjList->node;
+			int qnt = 0;
+			if( node != NULL ) {
+				while( node != NULL ) {
+					qnt++;
+					node = node->prox;
+				}
+			}
+			printf( "\nA quantidade de tarefas alocadas para o funcionario %d, e de %d", v->number, qnt);
+		}
+		v = v->prox;
+	}
+	
+}
+
+void assignTask() {
+	
+	int employeeId;
+	int taskId;
+	int valid;
+	
+	system("cls");
+	printf(" \n\n");
+	printf( "**********************************************\n");
+	printf( "*********** ADICIONAR FUNCIONARIO  ***********\n");
+	printf( "**********************************************\n");
+	printf("\n\n");
+	printf( "Digite o identificador do usuario\n");
+	scanf( "%i", &employeeId );
+	printf( "\nDigite o identificador da tarefa" );
+	scanf( "%i", &taskId );
+	
+	valid = isPresent( employeeId, 1 );
+	if( valid == -1 ) {
+		printf("\n\nO funcionario informado nao pertence a empresa." );
+	} else {
+		valid = isPresent( taskId, 2 );
+		if( valid == -1 ) {
+			printf("\n\nA tarefa informada nao pertence a empresa." );
+		} else {
+			int valid = bipartiteRestriction(employeeId, taskId);
+			if( valid == 1 ) {
+				addRelationship(company, employeeId, 1, taskId, 2 );
+			}
+		}
+	}
+	
+}
+
 int main() {
 	
 	int ctrl = -1;
 	int op;
+	
+	graph = createEmpty();
+	company = createEmpty();
 	
 	do {
 		
@@ -328,63 +532,31 @@ int main() {
 		printf("1 - Verificar Grafo\n");
 		printf("2 - Adicionar Funcionario\n" );
 		printf("3 - Adicionar Tarefa\n" );
-		printf("4 - Imprimir Grafo\n");
-		printf("5 - Sair\n");
+		printf("4 - Atribuir Tarefa\n" );
+		printf("5 - Imprimir Grafo\n");
+		printf("6 - Imprimir Empresa\n");
+		printf("7 - Validar Atribuicoes\n" );
+		printf("9 - Sair\n");
 		
-		scanf( "%i", &ctrl);
+		scanf( "%i", &ctrl );
 		
 		if( ctrl == 1 ) {
-			graph = createEmpty();
 			verifyGraph();
 		} else if( ctrl == 2 ) {
-			
+			addEmployee();
 		} else if( ctrl == 3 ) {
-		
+			addTask();
 		} else if( ctrl == 4 ) {
+			assignTask();
+		} else if( ctrl == 5 ) {
 			print( graph );
+		} else if( ctrl == 6 ) {
+			print( company );
+		} else if( ctrl == 7 ) {
+			checkAttributions();
 		}
 
-	} while( ctrl != 5 );
-
-	/*
-	graph = createEmpty();
-	
-	addVertice( graph, 1 );
-	addVertice( graph, 2 );
-	addVertice( graph, 3 );
-	addVertice( graph, 4 );
-	addVertice( graph, 5 );
-	addVertice( graph, 6 );
-	addVertice( graph, 7 );
-	addVertice( graph, 8 );
-	addEdge( graph, 0, 1 );
-	addEdge( graph, 0, 2 );
-	addEdge( graph, 2, 3 );
-	addEdge( graph, 3, 1 );
-	addEdge( graph, 0, 3 );
-	
-	print( graph );
-
-	int color[graph->nVertices];
-	int done[graph->nVertices];
-	int i = 0;
-	
-
-	for( i = 0 ; i < graph->nVertices ; i++ ) {
-		color[i] = -1;
-	}
-	
-	for( i = 0 ; i < graph->nVertices ; i++ ) {
-		done[i] = -1;
-	}
-
-	int currentColor = 0;
-	color[graph->vertice->number] = currentColor;
-	if( graph->vertice->prox != NULL ) {
-		int result = isBipartite( graph, graph->vertice->number, color, done, currentColor );
-		printf( "\n\nResultado: %d", result);
-	}
-	*/
+	} while( ctrl != 9 );
 	
 	printf( "\n\n\n\nOk" );
 	getch();
