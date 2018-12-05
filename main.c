@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+	Global variables
+*/
 struct Graph* graph;
 struct Graph* company;
 
@@ -49,6 +52,9 @@ struct AdjNode {
 	struct AdjNode *prox;
 };
 
+/**
+	Functions scopes
+*/
 void addEdge( struct Graph* g, int v1, int v2 );
 void addVertice( struct Graph* g, int value, int type );
 int validate( int identifier, int type );
@@ -137,6 +143,9 @@ void addEdge( struct Graph* g, int v1, int v2 ) {
 	
 }
 
+/**
+	Add a relationship between an employee and a task
+*/
 void addRelationship( struct Graph* g, int v1, int t1, int v2, int t2 ) {
 	
 	struct Vertice* vAux;
@@ -145,6 +154,10 @@ void addRelationship( struct Graph* g, int v1, int t1, int v2, int t2 ) {
 	
 	while( vAux != NULL ) {
 		
+		/**
+			Gets the Vertice (n1,t1) to add an edge to Vertice (n2,t2)
+			Does the same thing to Vertice (n2,t2) and add an edge to Vertice (n1,t1)
+		*/
 		if( vAux->number == v1 && vAux->type == t1 ) {
 					
 			struct AdjList* adjList = vAux->adjList;
@@ -254,31 +267,9 @@ int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor
 	
 }
 
-/*
-	Print the full graph representation
+/**
+	Loads a graph from a text file, then verifies if that Graph has a bipartite condition
 */
-void print( struct Graph* g ) {
-
-	printf( "\n\n");
-	
-	struct Vertice* aux;
-	aux = g->vertice;
-	while( aux != NULL ) {
-		printf( "\nVertice %d | type %d ", aux->number, aux->type );
-		struct AdjList* adjList = aux->adjList;
-		
-		struct AdjNode* node = adjList->node;
-		printf( "Lista Adj ");
-		while( node != NULL ) {
-			printf( "->" );
-			printf( " %d", node->number );
-			node = node->prox;
-		}
-		
-		aux = aux->prox;
-	}
-}
-
 void verifyGraph() {
     
 	/*
@@ -356,6 +347,7 @@ void verifyGraph() {
 
 /**
 	Validate the unique identifier compose by number plus type from all Vertices of a Graph
+	Return -1 if the Vertice (n,t) is already in the Graph, otherwise return 1
 */
 int validate( int identifier, int type ) {
 	
@@ -375,6 +367,10 @@ int validate( int identifier, int type ) {
 	
 }
 
+/**
+	Checks if a Vertice (n,t) is present in the current Graph representation
+	Returns 1 if a Vertice (n,t) is present in the Graph, otherwise return -1
+*/
 int isPresent( int identifier, int type ) {
 	if( identifier == 0 ) {
 		return 1;
@@ -391,50 +387,9 @@ int isPresent( int identifier, int type ) {
 	return -1;
 }
 
-void addEmployee() {
-	
-	int employeeId;
-	
-	system("cls");
-	printf(" \n\n");
-	printf( "**********************************************\n");
-	printf( "*********** ADICIONAR FUNCIONARIO  ***********\n");
-	printf( "**********************************************\n");
-	printf("\n\n");
-	printf( "Digite o identificador do usuario\n");
-	scanf( "%i", &employeeId );
-	
-	int valid = validate( employeeId, 1 );
-	if( valid == 1 ) {
-		addVertice( company, employeeId, 1 );
-	} else {
-		printf("\n\nNao foi possivel inserir o funcionario, o funcionario ja esta cadastrado na empresa" );
-	}
-	
-}
-
-void addTask() {
-	
-	int taskId;
-	
-	system("cls");
-	printf(" \n\n");
-	printf( "**********************************************\n");
-	printf( "************* ADICIONAR TAREFA  **************\n");
-	printf( "**********************************************\n");
-	printf("\n\n");
-	printf( "Digite o identificador da tarefa\n");
-	scanf( "%i", &taskId);
-	
-	int valid = validate( taskId, 2 );
-	if( valid == 1 ) {
-		addVertice( company, taskId, 2 );
-	} else {
-		printf( "\n\nNao foi possivel inserir a tarefa, a tarefa ja esta cadastrada na empresa" );
-	}
-	
-}
-
+/**
+	Checks if the Employee and a Task can be related to not broke the bipartite condition from the Graph
+*/
 int bipartiteRestriction( int employeeId, int taskId ) {
 	
 	int typeEmployee;
@@ -458,6 +413,10 @@ int bipartiteRestriction( int employeeId, int taskId ) {
 	}
 }
 
+/**
+	Function to check the quantity of tasks that are assigned to an Employee
+	The quantity of tasks is equal to the quantity of nodes in the respective Vertice adjascent list
+*/
 void checkAttributions() {
 	
 	struct Vertice* v = company->vertice;
@@ -479,6 +438,90 @@ void checkAttributions() {
 	
 }
 
+
+/**
+	IO FUNCIONS BLOCK START
+*/
+
+/*
+	Print the full graph representation
+*/
+void print( struct Graph* g ) {
+
+	printf( "\n\n");
+	
+	struct Vertice* aux;
+	aux = g->vertice;
+	while( aux != NULL ) {
+		printf( "\nVertice %d | type %d ", aux->number, aux->type );
+		struct AdjList* adjList = aux->adjList;
+		
+		struct AdjNode* node = adjList->node;
+		printf( "Lista Adj ");
+		while( node != NULL ) {
+			printf( "->" );
+			printf( " %d", node->number );
+			node = node->prox;
+		}
+		
+		aux = aux->prox;
+	}
+}
+
+/**
+	IO function to add a Employee ( Vertice (n,1) ) in the Graph representation
+*/
+void addEmployee() {
+	
+	int employeeId;
+	
+	system("cls");
+	printf(" \n\n");
+	printf( "**********************************************\n");
+	printf( "*********** ADICIONAR FUNCIONARIO  ***********\n");
+	printf( "**********************************************\n");
+	printf("\n\n");
+	printf( "Digite o identificador do usuario\n");
+	scanf( "%i", &employeeId );
+	
+	int valid = validate( employeeId, 1 );
+	if( valid == 1 ) {
+		addVertice( company, employeeId, 1 );
+	} else {
+		printf("\n\nNao foi possivel inserir o funcionario, o funcionario ja esta cadastrado na empresa" );
+	}
+	
+}
+
+/**
+	IO function to add a Task ( Vertice (n, 2) ) in the Graph representation
+*/
+void addTask() {
+	
+	int taskId;
+	
+	system("cls");
+	printf(" \n\n");
+	printf( "**********************************************\n");
+	printf( "************* ADICIONAR TAREFA  **************\n");
+	printf( "**********************************************\n");
+	printf("\n\n");
+	printf( "Digite o identificador da tarefa\n");
+	scanf( "%i", &taskId);
+	
+	int valid = validate( taskId, 2 );
+	if( valid == 1 ) {
+		addVertice( company, taskId, 2 );
+	} else {
+		printf( "\n\nNao foi possivel inserir a tarefa, a tarefa ja esta cadastrada na empresa" );
+	}
+	
+}
+
+/**
+	IO function to assign one Task to one Employee
+	The task will be only added, if it does not broke the bipartite condition of the Graph
+*/
 void assignTask() {
 	
 	int employeeId;
@@ -513,6 +556,13 @@ void assignTask() {
 	
 }
 
+/**
+	IO FUNCTIONS BLOCK END
+*/
+
+/**
+	IO main function
+*/
 int main() {
 	
 	int ctrl = -1;
