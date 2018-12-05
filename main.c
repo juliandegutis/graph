@@ -200,6 +200,9 @@ void addVertice( struct Graph* g, int value, int type ) {
 	
 }
 
+/**
+	Validates if there is no Vertice with no adjascent Vertices.
+*/
 int checkEdges( struct Graph* g ) {
 	struct Vertice* v = g->vertice;
 	
