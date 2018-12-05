@@ -200,6 +200,29 @@ void addVertice( struct Graph* g, int value, int type ) {
 	
 }
 
+int checkEdges( struct Graph* g ) {
+	struct Vertice* v = g->vertice;
+	
+	while( v != NULL ){
+		if( v->type == 1 ) {
+			struct AdjNode* node = v->adjList->node;
+			int qnt = 0;
+			if( node != NULL ) {
+				while( node != NULL ) {
+					qnt++;
+					node = node->prox;
+				}
+			}
+			if( qnt == 0 ) {
+				return -1;
+			}
+		}
+		v = v->prox;
+	}
+	
+	return 1;
+}
+
 /*
 	Recursevly check if a Graph is bipartite, based on current vertice
 */
@@ -207,7 +230,13 @@ int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor
 	
 	struct Vertice* aux = g->vertice;	
 	printf( "\nStarting vertice: %d", v );
-
+	
+	int valid = checkEdges( g );
+	
+	if( valid == -1 ) {
+		return -1;
+	}
+	
 	/*
 		Iterates the Graph checking if the current Vertice is equal to an vertice
 	*/
