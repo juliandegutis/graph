@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+struct Graph* graph;
 
 /*
  A graph structure compose by
@@ -49,6 +50,7 @@ void addEdge( struct Graph* g, int v1, int v2 );
 void addVertice( struct Graph* g, int value );
 int isBipartite( struct Graph* g, int v, int* color, int* done, int currentColor );
 struct Vertice* createVertice();
+void verifyGraph();
 
 /*
 	Instance method to create an empty Graph with only one vertice and no edges.
@@ -134,12 +136,11 @@ void addEdge( struct Graph* g, int v1, int v2 ) {
 */
 void addVertice( struct Graph* g, int value ) {
 	
-	struct Vertice* v = createVertice( value );
-	
+	printf( "Adding %d\n", value);
+	struct Vertice* v = createVertice( value );	
 	v->color = -1;
 	v->prox = g->vertice;
 	g->vertice = v;
-	
 	g->nVertices = g->nVertices + 1;
 	
 }
@@ -221,13 +222,14 @@ void print( struct Graph* g ) {
 	struct Vertice* aux;
 	aux = g->vertice;
 	while( aux != NULL ) {
-		printf( "\nVertice %d  - Color %d  ", aux->number, aux->color );
+		printf( "\nVertice %d ", aux->number );
 		struct AdjList* adjList = aux->adjList;
 		
 		struct AdjNode* node = adjList->node;
-		printf( "Lista Adj -> ");
+		printf( "Lista Adj ");
 		while( node != NULL ) {
-			printf( "%d -> ", node->number );
+			printf( "->" );
+			printf( " %d", node->number );
 			node = node->prox;
 		}
 		
@@ -235,72 +237,153 @@ void print( struct Graph* g ) {
 	}
 }
 
+void verifyGraph() {
+    
+	/*
+		Load file block start
+	*/
+	char currentline[1000];
+    char *pt;
+    int pos[1000];
+    FILE *file;
+
+    if ((file = fopen("graph.txt", "r")) == NULL)
+    {
+        printf("Error! opening file");
+        // Program exits if file pointer returns NULL.
+        exit(1);         
+    }
+
+	fgets(currentline, sizeof(currentline), file);
+	fprintf(stderr, "got line: %s\n", currentline);
+	pt = strtok(currentline,",");
+	int i = 0;
+	while (pt != NULL) {
+    	int a = atoi(pt);
+    	addVertice( graph, a );
+    	pt = strtok(NULL, ",");
+	}
+
+	while (fgets(currentline, sizeof(currentline), file) != NULL) {
+		pt = strtok (currentline,",");
+    	i = 0;
+		while (pt != NULL) {
+        	int a = atoi(pt);
+        	pos[i++] = a;
+        	pt = strtok (NULL, ",");
+    	}
+    	addEdge(graph, (int)pos[0], (int)pos[1]);	
+	}
+	
+  	fclose(file);
+  	
+  	print(graph);
+  	/*
+  		Load file end block
+  	*/
+  	
+  	/*
+	  Start iteration to bipartite verification 
+  	*/
+  	int color[graph->nVertices];
+	int done[graph->nVertices];
+	i = 0;
+	
+
+	for( i = 0 ; i < graph->nVertices ; i++ ) {
+		color[i] = -1;
+	}
+	
+	for( i = 0 ; i < graph->nVertices ; i++ ) {
+		done[i] = -1;
+	}
+
+	int currentColor = 0;
+	color[graph->vertice->number] = currentColor;
+	if( graph->vertice->prox != NULL ) {
+		int result = isBipartite( graph, graph->vertice->number, color, done, currentColor );
+		if( result == -1 ) {
+			printf( "\n\nResultado: O grafico nao e bipartido", result);
+		} else {
+			printf( "\n\nResultado: O grafico e bipartido", result);
+		}
+	
+	}
+  	
+}
+
 int main() {
 	
-	int ctrl = 1;
+	int ctrl = -1;
 	int op;
 	
 	do {
 		
+		printf(" \n\n");
 		printf( "**********************************************\n");
 		printf( "*****************   GRAFOS  ******************\n");
 		printf( "**********************************************\n");
 		printf("\n\n");
 		printf("Menu: \n");
 		printf("1 - Verificar Grafo\n");
-		printf("2 - Adicionar Funcionário\n" );
+		printf("2 - Adicionar Funcionario\n" );
 		printf("3 - Adicionar Tarefa\n" );
 		printf("4 - Imprimir Grafo\n");
 		printf("5 - Sair\n");
 		
-		scanf( "Opcao %d", &ctrl);
+		scanf( "%i", &ctrl);
 		
-		printf("%d", ctrl);
+		if( ctrl == 1 ) {
+			graph = createEmpty();
+			verifyGraph();
+		} else if( ctrl == 2 ) {
+			
+		} else if( ctrl == 3 ) {
 		
-		ctrl = 2;
-	} while( ctrl == 1 );
-	
-	struct Graph* g = createEmpty();
-	
-	addVertice( g, 1 );
-	addVertice( g, 2 );
-	addVertice( g, 3 );
-	addEdge( g, 0, 1 );
-	addEdge( g, 0, 2 );
-	addEdge( g, 2, 3 );
-	addEdge( g, 3, 1 );
-	addEdge( g, 0, 3 );
-	
-	//print( g );
-	
+		} else if( ctrl == 4 ) {
+			print( graph );
+		}
+
+	} while( ctrl != 5 );
+
 	/*
-		Bipartite validation start block 
-	*/
-	int color[g->nVertices];
-	int done[g->nVertices];
+	graph = createEmpty();
+	
+	addVertice( graph, 1 );
+	addVertice( graph, 2 );
+	addVertice( graph, 3 );
+	addVertice( graph, 4 );
+	addVertice( graph, 5 );
+	addVertice( graph, 6 );
+	addVertice( graph, 7 );
+	addVertice( graph, 8 );
+	addEdge( graph, 0, 1 );
+	addEdge( graph, 0, 2 );
+	addEdge( graph, 2, 3 );
+	addEdge( graph, 3, 1 );
+	addEdge( graph, 0, 3 );
+	
+	print( graph );
+
+	int color[graph->nVertices];
+	int done[graph->nVertices];
 	int i = 0;
 	
-	/*
-		Start both color and done array with -1 
-	*/
-	for( i = 0 ; i < g->nVertices ; i++ ) {
+
+	for( i = 0 ; i < graph->nVertices ; i++ ) {
 		color[i] = -1;
 	}
 	
-	for( i = 0 ; i < g->nVertices ; i++ ) {
+	for( i = 0 ; i < graph->nVertices ; i++ ) {
 		done[i] = -1;
 	}
-	/*
-		Fill the color of the first vertice in our Graph representation with 0, then check if it is not a graph with only one vertice.
-	*/
+
 	int currentColor = 0;
-	color[g->vertice->number] = currentColor;
-	if( g->vertice->prox != NULL ) {
-		int result = isBipartite( g, g->vertice->number, color, done, currentColor );
+	color[graph->vertice->number] = currentColor;
+	if( graph->vertice->prox != NULL ) {
+		int result = isBipartite( graph, graph->vertice->number, color, done, currentColor );
 		printf( "\n\nResultado: %d", result);
 	}
-	/*
-		Bipartite validation end block
 	*/
 	
 	printf( "\n\n\n\nOk" );
