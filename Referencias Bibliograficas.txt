@@ -1,0 +1,3 @@
+http://www.inf.ufsc.br/grafos/definicoes/definicao.html
+https://stackoverflow.com/questions/10349270/c-split-a-char-array-into-different-variables
+https://www.tutorialspoint.com/cprogramming/c_file_io.htm
